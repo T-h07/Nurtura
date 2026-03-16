@@ -74,10 +74,12 @@ PT01 established the modular full-stack base. NT-PT02 adds authentication founda
    .\mvnw.cmd spring-boot:run
    ```
 
-   Optional if `8080` is already in use:
+   Backend reads root `.env` automatically for local settings.
+   Default local port is `18080` (`NURTURA_SERVER_PORT`).
+   Override only if needed:
 
    ```powershell
-   $env:NURTURA_SERVER_PORT="8081"
+   $env:NURTURA_SERVER_PORT="8080"
    .\mvnw.cmd spring-boot:run
    ```
 
@@ -89,14 +91,40 @@ PT01 established the modular full-stack base. NT-PT02 adds authentication founda
    npm run dev
    ```
 
-   If backend is running on a non-default port, set the Vite proxy target first:
+   Frontend proxy automatically reads `NURTURA_SERVER_PORT` from the repo root `.env`.
+   Keep backend and frontend aligned by changing only `.env`.
+   You can still force an explicit origin:
 
    ```powershell
-   $env:NURTURA_BACKEND_ORIGIN="http://localhost:8081"
+   $env:NURTURA_BACKEND_ORIGIN="http://localhost:8080"
    npm run dev
    ```
 
 5. Open `http://localhost:5173` and sign in.
+
+## Tauri Desktop Dev
+
+Tauri is now scaffolded for desktop-shell development from the same frontend codebase.
+
+1. Ensure Windows prerequisites are installed (once per machine):
+   - Rust toolchain (`rustup`, `cargo`, `rustc`)
+   - Microsoft C++ build tools (Visual Studio Build Tools)
+   - WebView2 runtime
+2. Keep PostgreSQL + backend running (from Local Setup above).
+3. In a new terminal:
+
+   ```powershell
+   cd frontend
+   npm install
+   npm run tauri-dev
+   ```
+
+Desktop dev uses the same proxy behavior (auto from `NURTURA_SERVER_PORT`, or explicit override):
+
+```powershell
+$env:NURTURA_BACKEND_ORIGIN="http://localhost:8080"
+npm run tauri-dev
+```
 
 ## Authentication and Routing Flow
 

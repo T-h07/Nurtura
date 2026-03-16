@@ -30,17 +30,33 @@ export function buildBasicAuthorizationHeader(username: string, password: string
 }
 
 export async function fetchCurrentSession(authorizationHeader: string): Promise<AuthSession> {
-  const response = await fetch(SESSION_ENDPOINT, {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      Authorization: authorizationHeader,
-    },
-  })
+  let response: Response
+
+  try {
+    response = await fetch(SESSION_ENDPOINT, {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: authorizationHeader,
+      },
+    })
+  } catch {
+    throw new AuthApiError(
+      'Cannot reach backend authentication service. Confirm backend is running on the configured port.',
+      0,
+    )
+  }
 
   if (!response.ok) {
     if (response.status === 401 || response.status === 403) {
       throw new AuthApiError('Invalid credentials.', response.status)
+    }
+
+    if (response.status === 404) {
+      throw new AuthApiError(
+        'Authentication endpoint was not found. Check backend port and frontend proxy configuration.',
+        response.status,
+      )
     }
 
     throw new AuthApiError('Authentication service is unavailable.', response.status)
