@@ -1,6 +1,27 @@
-# Nurtura PT01 Foundation
+# Nurtura Foundation (PT01 + NT-PT02)
 
-PT01 establishes a clean full-stack foundation for Nurtura as a modular monolith with explicit boundaries for management, classroom, and a later parent portal.
+Nurtura is a desktop-first kindergarten management platform with:
+- Management/Admin surface
+- Teacher/Classroom surface
+- Parent portal planned for a later phase
+
+PT01 established the modular full-stack base. NT-PT02 adds authentication foundation, role-aware behavior, protected routing, and desktop-style app shells with persistent sidebar navigation.
+
+## Stack
+
+- Backend: Java 21, Spring Boot, Spring Security, PostgreSQL, Flyway
+- Frontend: React, TypeScript, Tailwind CSS, React Router
+- Database: PostgreSQL in Docker
+
+## Key NT-PT02 Additions
+
+- Login foundation aligned with Spring Security dev skeleton
+- `GET /api/auth/me` session endpoint for frontend role awareness
+- Role model wired end-to-end (`PLATFORM_ADMIN`, `MANAGEMENT`, `TEACHER`, `PARENT`)
+- Protected routes and reusable route guards
+- Desktop-first UI shell with persistent left sidebar
+- Separate operational shells for management and classroom surfaces
+- Parent role remains in the model, but parent surface stays intentionally inactive
 
 ## Repo Layout
 
@@ -19,7 +40,10 @@ PT01 establishes a clean full-stack foundation for Nurtura as a modular monolith
 |-- frontend/
 |   `-- src/
 |       |-- app/
+|       |   |-- layout/
+|       |   `-- router/
 |       |-- features/
+|       |   |-- auth/
 |       |   |-- classroom/
 |       |   `-- management/
 |       `-- shared/
@@ -27,33 +51,12 @@ PT01 establishes a clean full-stack foundation for Nurtura as a modular monolith
 `-- .env.example
 ```
 
-## Foundation Choices
-
-- **Architecture:** modular monolith, because it keeps deployment and local development simple while preserving clean module seams.
-- **Security:** role structure is defined now for `PLATFORM_ADMIN`, `MANAGEMENT`, `TEACHER`, and `PARENT`; the current auth mechanism is a development-only Spring Security skeleton using in-memory users.
-- **Persistence:** PostgreSQL runs in Docker and Flyway owns all schema changes from the first migration.
-- **Deletion behavior:** the initial `user_account_role` join table uses `ON DELETE RESTRICT`, so cleanup stays explicit and audit-friendly instead of hiding behavior behind cascade deletes.
-
-## Backend Notes
-
-- `common/` holds shared API and persistence infrastructure.
-- `modules/identity/` contains the initial account and role persistence model.
-- `modules/management/` and `modules/classroom/` each have their own `dto`, `service`, and `web` packages.
-- `modules/parent/` is intentionally reserved so future work can slot in without reshaping the existing module graph.
-
-Available starter endpoints:
+## API Endpoints (Current Foundation)
 
 - `GET /api/public/health`
+- `GET /api/auth/me`
 - `GET /api/management/workspace`
 - `GET /api/classroom/workspace`
-
-## Frontend Notes
-
-- `app/` assembles the shell.
-- `features/management` and `features/classroom` own their workspace panels.
-- `shared/` contains reusable UI and shared content.
-
-The current app shell is a warm, premium foundation page that already reflects the management/classroom split without overcommitting to detailed workflows too early.
 
 ## Local Setup
 
@@ -64,14 +67,21 @@ The current app shell is a warm, premium foundation page that already reflects t
    docker compose up -d
    ```
 
-3. Start the backend:
+3. Start backend:
 
    ```powershell
    cd backend
    .\mvnw.cmd spring-boot:run
    ```
 
-4. Start the frontend in a second terminal:
+   Optional if `8080` is already in use:
+
+   ```powershell
+   $env:NURTURA_SERVER_PORT="8081"
+   .\mvnw.cmd spring-boot:run
+   ```
+
+4. Start frontend in a second terminal:
 
    ```powershell
    cd frontend
@@ -79,11 +89,29 @@ The current app shell is a warm, premium foundation page that already reflects t
    npm run dev
    ```
 
-5. Open the frontend at `http://localhost:5173`.
+   If backend is running on a non-default port, set the Vite proxy target first:
+
+   ```powershell
+   $env:NURTURA_BACKEND_ORIGIN="http://localhost:8081"
+   npm run dev
+   ```
+
+5. Open `http://localhost:5173` and sign in.
+
+## Authentication and Routing Flow
+
+- Login uses backend Basic auth (development-only foundation).
+- Frontend validates credentials via `GET /api/auth/me`.
+- Session auth header is stored in `sessionStorage` for local development.
+- Route access is guarded by role:
+  - Management shell: `/app/management/:section` (`PLATFORM_ADMIN`, `MANAGEMENT`)
+  - Classroom shell: `/app/classroom/:section` (`PLATFORM_ADMIN`, `TEACHER`)
+  - Unsupported active role path: `/app/unsupported`
+- `/app` automatically redirects to the correct default shell by role.
 
 ## Development Credentials
 
 - Admin: `admin@nurtura.local` / `ChangeMe123!`
 - Teacher: `teacher@nurtura.local` / `ChangeMe123!`
 
-These credentials are only intended for local development and should be replaced by a real identity flow in the next phase.
+These credentials are local-only and should be replaced by real authentication in a later phase.

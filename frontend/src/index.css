@@ -19,7 +19,7 @@
 :root {
   color-scheme: light;
   font-family: "DM Sans", sans-serif;
-  background-color: #f7f1e7;
+  background-color: #f6efe4;
   color: #1f2a25;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -39,10 +39,11 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  line-height: 1.4;
   background:
-    radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), transparent 42%),
-    radial-gradient(circle at top right, rgba(207, 115, 67, 0.12), transparent 30%),
-    linear-gradient(180deg, #f7f1e7 0%, #efe5d5 100%);
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.85), transparent 42%),
+    radial-gradient(circle at top right, rgba(207, 115, 67, 0.1), transparent 32%),
+    linear-gradient(180deg, #f6efe4 0%, #e7dcc9 100%);
 }
 
 #root {
