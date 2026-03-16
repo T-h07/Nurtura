@@ -1,12 +1,15 @@
 import { resolve } from 'node:path'
-import { defineConfig, loadEnv } from 'vite'
+import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { resolveDevBackendOrigin } from './config/devBackendOrigin'
 
 export default defineConfig(({ mode }) => {
   const envDir = resolve(__dirname, '..')
-  const env = loadEnv(mode, envDir, '')
-  const backendPort = env.NURTURA_SERVER_PORT || '18080'
-  const backendOrigin = env.NURTURA_BACKEND_ORIGIN || `http://localhost:${backendPort}`
+  const backend = resolveDevBackendOrigin(mode, envDir)
+
+  console.info(
+    `[nurtura] frontend dev proxy /api -> ${backend.origin} (NURTURA_BACKEND_HOST=${backend.host}, NURTURA_SERVER_PORT=${backend.port})`,
+  )
 
   return {
     envDir,
@@ -15,7 +18,7 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       proxy: {
         '/api': {
-          target: backendOrigin,
+          target: backend.origin,
           changeOrigin: true,
         },
       },

@@ -1,6 +1,9 @@
 import { parseAppRoles, type AppRole } from '../model/AppRole'
 
 const SESSION_ENDPOINT = '/api/auth/me'
+const BACKEND_UNAVAILABLE_COOLDOWN_MS = 2000
+
+let backendUnavailableUntil = 0
 
 interface AuthSessionPayload {
   username: string
@@ -30,6 +33,13 @@ export function buildBasicAuthorizationHeader(username: string, password: string
 }
 
 export async function fetchCurrentSession(authorizationHeader: string): Promise<AuthSession> {
+  if (Date.now() < backendUnavailableUntil) {
+    throw new AuthApiError(
+      'Cannot reach backend authentication service. Confirm backend is running on the configured port.',
+      0,
+    )
+  }
+
   let response: Response
 
   try {
@@ -41,6 +51,7 @@ export async function fetchCurrentSession(authorizationHeader: string): Promise<
       },
     })
   } catch {
+    backendUnavailableUntil = Date.now() + BACKEND_UNAVAILABLE_COOLDOWN_MS
     throw new AuthApiError(
       'Cannot reach backend authentication service. Confirm backend is running on the configured port.',
       0,
@@ -61,6 +72,8 @@ export async function fetchCurrentSession(authorizationHeader: string): Promise<
 
     throw new AuthApiError('Authentication service is unavailable.', response.status)
   }
+
+  backendUnavailableUntil = 0
 
   const payload = (await response.json()) as AuthSessionPayload
 

@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -24,6 +25,8 @@ import {
 } from './AuthContext'
 
 const AUTH_STORAGE_KEY = 'nurtura.auth.basic'
+const AUTH_BOOTSTRAP_UNAVAILABLE_MESSAGE =
+  'Backend authentication service is unavailable. Start backend and retry sign in.'
 
 function getStoredAuthorizationHeader() {
   return window.sessionStorage.getItem(AUTH_STORAGE_KEY)
@@ -38,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getStoredAuthorizationHeader(),
   )
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const sessionRestoreInFlightRef = useRef<string | null>(null)
 
   const establishSession = useCallback((header: string, user: AuthUser) => {
     window.sessionStorage.setItem(AUTH_STORAGE_KEY, header)
@@ -59,6 +63,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
+    if (sessionRestoreInFlightRef.current === authorizationHeader) {
+      return
+    }
+
+    sessionRestoreInFlightRef.current = authorizationHeader
+
     let isCurrent = true
 
     const restoreSession = async () => {
@@ -73,12 +83,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           username: restoredSession.username,
           roles: restoredSession.roles,
         })
-      } catch {
+      } catch (error) {
         if (!isCurrent) {
           return
         }
 
+        if (error instanceof AuthApiError && error.statusCode === 0) {
+          setErrorMessage(AUTH_BOOTSTRAP_UNAVAILABLE_MESSAGE)
+        }
+
         clearSession()
+      } finally {
+        if (sessionRestoreInFlightRef.current === authorizationHeader) {
+          sessionRestoreInFlightRef.current = null
+        }
       }
     }
 

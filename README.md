@@ -67,6 +67,15 @@ PT01 established the modular full-stack base. NT-PT02 added authentication found
 - `GET /api/management/operational-context`
 - `GET /api/classroom/workspace`
 
+## Local Connectivity Source of Truth
+
+Local frontend/backend connectivity is centralized in root `.env`:
+
+- `NURTURA_BACKEND_HOST` (frontend proxy host, default `127.0.0.1`)
+- `NURTURA_SERVER_PORT` (shared backend listen port and frontend proxy target port)
+
+For local development, avoid ad-hoc shell overrides and update these `.env` values instead.
+
 ## Core Domain Backbone (NT-PT03)
 
 Persistent operational model now includes:
@@ -116,14 +125,11 @@ Design notes:
    npm run dev
    ```
 
-   Frontend proxy automatically reads `NURTURA_SERVER_PORT` from the repo root `.env`.
-   Keep backend and frontend aligned by changing only `.env`.
-   You can still force an explicit origin:
+   Frontend proxy reads backend connectivity from the same root `.env` values:
+   - `NURTURA_BACKEND_HOST` (default `127.0.0.1`)
+   - `NURTURA_SERVER_PORT` (default `18080`)
 
-   ```powershell
-   $env:NURTURA_BACKEND_ORIGIN="http://localhost:8080"
-   npm run dev
-   ```
+   Keep backend and frontend aligned by changing only `.env`, then restart backend + frontend.
 
 5. Open `http://localhost:5173` and sign in.
 
@@ -144,12 +150,8 @@ Tauri is now scaffolded for desktop-shell development from the same frontend cod
    npm run tauri-dev
    ```
 
-Desktop dev uses the same proxy behavior (auto from `NURTURA_SERVER_PORT`, or explicit override):
-
-```powershell
-$env:NURTURA_BACKEND_ORIGIN="http://localhost:8080"
-npm run tauri-dev
-```
+Desktop dev uses the exact same Vite proxy configuration and `.env` source of truth as `npm run dev`.
+If backend host/port changes, update `.env` once and restart `npm run tauri-dev`.
 
 ## Authentication and Routing Flow
 
