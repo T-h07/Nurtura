@@ -1,0 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Sora:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "DM Sans", sans-serif;
+  --font-display: "Sora", sans-serif;
+
+  --color-oat: #f7f1e7;
+  --color-cream: #fffaf2;
+  --color-clay: #cf7343;
+  --color-clay-soft: #f2d3bf;
+  --color-pine: #214338;
+  --color-sage: #8eb08e;
+  --color-sand: #e9dcc6;
+  --color-ink: #1f2a25;
+  --color-mist: #d7e0d6;
+}
+
+:root {
+  color-scheme: light;
+  font-family: "DM Sans", sans-serif;
+  background-color: #f7f1e7;
+  color: #1f2a25;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), transparent 42%),
+    radial-gradient(circle at top right, rgba(207, 115, 67, 0.12), transparent 30%),
+    linear-gradient(180deg, #f7f1e7 0%, #efe5d5 100%);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+::selection {
+  background-color: rgba(207, 115, 67, 0.22);
+}

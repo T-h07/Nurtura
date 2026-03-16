@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: nurtura-backend
+  datasource:
+    url: jdbc:postgresql://${NURTURA_DB_HOST:localhost}:${NURTURA_DB_PORT:5432}/${NURTURA_DB_NAME:nurtura}
+    username: ${NURTURA_DB_USERNAME:nurtura_app}
+    password: ${NURTURA_DB_PASSWORD:nurtura_dev_password}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
+
+nurtura:
+  security:
+    dev-users:
+      admin-username: ${NURTURA_ADMIN_USERNAME:admin@nurtura.local}
+      admin-password: ${NURTURA_ADMIN_PASSWORD:ChangeMe123!}
+      teacher-username: ${NURTURA_TEACHER_USERNAME:teacher@nurtura.local}
+      teacher-password: ${NURTURA_TEACHER_PASSWORD:ChangeMe123!}

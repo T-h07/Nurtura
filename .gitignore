@@ -1,0 +1,9 @@
+.env
+*.iml
+*.log
+.idea/
+
+backend/target/
+
+frontend/dist/
+frontend/node_modules/
