@@ -1,11 +1,11 @@
-# Nurtura Foundation (PT01 + NT-PT02)
+# Nurtura Foundation (PT01 + NT-PT02 + NT-PT03)
 
 Nurtura is a desktop-first kindergarten management platform with:
 - Management/Admin surface
 - Teacher/Classroom surface
 - Parent portal planned for a later phase
 
-PT01 established the modular full-stack base. NT-PT02 adds authentication foundation, role-aware behavior, protected routing, and desktop-style app shells with persistent sidebar navigation.
+PT01 established the modular full-stack base. NT-PT02 added authentication foundation, role-aware behavior, protected routing, and desktop-style app shells with persistent sidebar navigation. NT-PT03 adds the first persistent operational domain backbone for organization, sites, rooms, and staff.
 
 ## Stack
 
@@ -13,7 +13,7 @@ PT01 established the modular full-stack base. NT-PT02 adds authentication founda
 - Frontend: React, TypeScript, Tailwind CSS, React Router
 - Database: PostgreSQL in Docker
 
-## Key NT-PT02 Additions
+## Key NT-PT02 and NT-PT03 Additions
 
 - Login foundation aligned with Spring Security dev skeleton
 - `GET /api/auth/me` session endpoint for frontend role awareness
@@ -22,6 +22,9 @@ PT01 established the modular full-stack base. NT-PT02 adds authentication founda
 - Desktop-first UI shell with persistent left sidebar
 - Separate operational shells for management and classroom surfaces
 - Parent role remains in the model, but parent surface stays intentionally inactive
+- Core domain tables via Flyway: `organization`, `site`, `room`, `staff_member`
+- Explicit FK strategy (`ON DELETE RESTRICT`) for audit-friendly lifecycle control
+- Management operational context endpoint backed by real persisted structure
 
 ## Repo Layout
 
@@ -31,6 +34,7 @@ PT01 established the modular full-stack base. NT-PT02 adds authentication founda
 |   |-- src/main/java/com/nurtura/platform/
 |   |   |-- common/
 |   |   |-- modules/
+|   |   |   |-- core/
 |   |   |   |-- classroom/
 |   |   |   |-- identity/
 |   |   |   |-- management/
@@ -46,6 +50,10 @@ PT01 established the modular full-stack base. NT-PT02 adds authentication founda
 |       |   |-- auth/
 |       |   |-- classroom/
 |       |   `-- management/
+|       |       |-- api/
+|       |       |-- components/
+|       |       |-- model/
+|       |       `-- pages/
 |       `-- shared/
 |-- docker-compose.yml
 `-- .env.example
@@ -56,7 +64,23 @@ PT01 established the modular full-stack base. NT-PT02 adds authentication founda
 - `GET /api/public/health`
 - `GET /api/auth/me`
 - `GET /api/management/workspace`
+- `GET /api/management/operational-context`
 - `GET /api/classroom/workspace`
+
+## Core Domain Backbone (NT-PT03)
+
+Persistent operational model now includes:
+
+- `organization`: kindergarten identity and lifecycle status
+- `site`: branch/campus structure linked to organization
+- `room`: class-space structure linked to site
+- `staff_member`: staff profile foundation linked to organization/site/room and optional `user_account`
+
+Design notes:
+
+- Audit timestamps (`created_at`, `updated_at`) are applied across these tables
+- Foreign keys are explicit and restrictive to prevent accidental destructive deletes
+- This backbone is intentionally limited to structure; children/attendance/planning/finance workflows are still deferred to later phases
 
 ## Local Setup
 
@@ -76,6 +100,7 @@ PT01 established the modular full-stack base. NT-PT02 adds authentication founda
 
    Backend reads root `.env` automatically for local settings.
    Default local port is `18080` (`NURTURA_SERVER_PORT`).
+   Flyway runs `V1` + `V2` automatically on startup.
    Override only if needed:
 
    ```powershell
