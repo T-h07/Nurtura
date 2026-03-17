@@ -1,11 +1,11 @@
-# Nurtura Foundation (PT01 + NT-PT02 + NT-PT03)
+# Nurtura Foundation (PT01 + NT-PT02 + NT-PT03 + NT-PT04)
 
 Nurtura is a desktop-first kindergarten management platform with:
 - Management/Admin surface
 - Teacher/Classroom surface
 - Parent portal planned for a later phase
 
-PT01 established the modular full-stack base. NT-PT02 added authentication foundation, role-aware behavior, protected routing, and desktop-style app shells with persistent sidebar navigation. NT-PT03 adds the first persistent operational domain backbone for organization, sites, rooms, and staff.
+PT01 established the modular full-stack base. NT-PT02 added authentication foundation, role-aware behavior, protected routing, and desktop-style app shells with persistent sidebar navigation. NT-PT03 added the first persistent operational domain backbone for organization, sites, rooms, and staff. NT-PT04 now introduces the first real child and guardian management domain layer.
 
 ## Stack
 
@@ -13,7 +13,7 @@ PT01 established the modular full-stack base. NT-PT02 added authentication found
 - Frontend: React, TypeScript, Tailwind CSS, React Router
 - Database: PostgreSQL in Docker
 
-## Key NT-PT02 and NT-PT03 Additions
+## Key NT-PT02 to NT-PT04 Additions
 
 - Login foundation aligned with Spring Security dev skeleton
 - `GET /api/auth/me` session endpoint for frontend role awareness
@@ -25,6 +25,11 @@ PT01 established the modular full-stack base. NT-PT02 added authentication found
 - Core domain tables via Flyway: `organization`, `site`, `room`, `staff_member`
 - Explicit FK strategy (`ON DELETE RESTRICT`) for audit-friendly lifecycle control
 - Management operational context endpoint backed by real persisted structure
+- Child foundation table via Flyway: `child_profile`
+- Guardian foundation table via Flyway: `guardian_contact`
+- Child-guardian relationship table via Flyway: `child_guardian_link`
+- Management endpoints for child list/details/create/update and guardian link management
+- Management children surface with child profile view and linked guardian contacts
 
 ## Repo Layout
 
@@ -65,9 +70,18 @@ PT01 established the modular full-stack base. NT-PT02 added authentication found
 - `GET /api/auth/me`
 - `GET /api/management/workspace`
 - `GET /api/management/operational-context`
+- `GET /api/management/children`
+- `GET /api/management/children/{childId}`
+- `POST /api/management/children`
+- `PUT /api/management/children/{childId}`
+- `GET /api/management/children/{childId}/guardians`
+- `PUT /api/management/children/{childId}/guardians/{guardianId}`
+- `GET /api/management/guardians`
+- `POST /api/management/guardians`
+- `PUT /api/management/guardians/{guardianId}`
 - `GET /api/classroom/workspace`
 
-## Core Domain Backbone (NT-PT03)
+## Core Domain Backbone (NT-PT03 + NT-PT04)
 
 Persistent operational model now includes:
 
@@ -75,12 +89,16 @@ Persistent operational model now includes:
 - `site`: branch/campus structure linked to organization
 - `room`: class-space structure linked to site
 - `staff_member`: staff profile foundation linked to organization/site/room and optional `user_account`
+- `child_profile`: child identity, date-of-birth, lifecycle state, and operational context assignment
+- `guardian_contact`: guardian/parent contact identity and lifecycle state
+- `child_guardian_link`: explicit many-to-many child-guardian relationship with relationship label, primary/emergency flags, and lifecycle state
 
 Design notes:
 
 - Audit timestamps (`created_at`, `updated_at`) are applied across these tables
 - Foreign keys are explicit and restrictive to prevent accidental destructive deletes
-- This backbone is intentionally limited to structure; children/attendance/planning/finance workflows are still deferred to later phases
+- Child and guardian scope is intentionally focused on profile/contact foundations
+- Attendance, child progress, syllabus delivery, and finance workflows are intentionally deferred to later phases
 
 ## Local Setup
 
@@ -100,7 +118,7 @@ Design notes:
 
    Backend reads root `.env` automatically for local settings.
    Default local port is `18080` (`NURTURA_SERVER_PORT`).
-   Flyway runs `V1` + `V2` automatically on startup.
+   Flyway runs `V1` + `V2` + `V3` automatically on startup.
    Override only if needed:
 
    ```powershell

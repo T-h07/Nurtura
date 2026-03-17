@@ -3,6 +3,7 @@ import { Navigate, useParams } from 'react-router-dom'
 import { AppShell, type SidebarNavigationItem } from '../../../app/layout/AppShell'
 import { useAuth } from '../../auth/hooks/useAuth'
 import { ManagementApiError, fetchOperationalContext } from '../api/managementApi'
+import { ChildrenManagementPanel } from '../components/ChildrenManagementPanel'
 import { OperationalStructurePanel } from '../components/OperationalStructurePanel'
 import type { ManagementOperationalContext } from '../model/OperationalContext'
 import {
@@ -124,16 +125,16 @@ function buildManagementSectionContent(
     children: {
       title: 'Children',
       summary:
-        'Child domain is intentionally deferred. PT03 establishes the operational structure it will depend on.',
+        'Children and guardian contacts are now managed through real PT04 data foundations and linked relationships.',
       metrics: [
-        { label: 'Module state', value: 'Planned' },
-        { label: 'Data dependencies', value: 'Ready' },
-        { label: 'Next phase', value: 'PT04+' },
+        { label: 'Module state', value: 'Active foundation' },
+        { label: 'Core entities', value: 'Children + guardians' },
+        { label: 'Relationship model', value: 'Many-to-many links' },
       ],
       quickActions: [
-        { title: 'Keep scope restrained', description: 'Do not add child CRUD before dependent workflows are defined.' },
-        { title: 'Review structure fit', description: 'Confirm room and staff data can host child assignments.' },
-        { title: 'Prepare compliance inputs', description: 'Identify safeguarding data requirements for next phase.' },
+        { title: 'Review child profiles', description: 'Open child details and verify context assignments.' },
+        { title: 'Maintain guardian links', description: 'Confirm primary and emergency contact configuration.' },
+        { title: 'Keep scope focused', description: 'Defer attendance and progress flows to future phases.' },
       ],
     },
     planning: {
@@ -229,7 +230,9 @@ export function ManagementShellPage() {
 
   const sectionContent = buildManagementSectionContent(operationalContext)
   const currentContent = sectionContent[section]
-  const showOperationalStructure = section === 'overview' || section === 'management'
+  const showOperationalStructure =
+    section === 'overview' || section === 'management' || section === 'classroom'
+  const showChildrenSurface = section === 'children'
 
   return (
     <AppShell
@@ -251,7 +254,14 @@ export function ManagementShellPage() {
             errorMessage={operationalContextError}
           />
         ) : null}
-        <WorkspaceSectionPanel content={currentContent} />
+        {showChildrenSurface ? (
+          <ChildrenManagementPanel
+            authorizationHeader={authorizationHeader}
+            operationalContext={operationalContext}
+          />
+        ) : (
+          <WorkspaceSectionPanel content={currentContent} />
+        )}
       </div>
     </AppShell>
   )
